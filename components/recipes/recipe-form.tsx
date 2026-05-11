@@ -3,14 +3,33 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
-import { createRecipe } from "@/actions/recipe-actions";
+import { createRecipe, updateRecipe } from "@/actions/recipe-actions";
+import {
+  validateCookingTimeRaw,
+  validateIngredientLines,
+  validateInstructionSteps,
+  validateTitle,
+} from "@/lib/recipe-validation";
 
 import { CategorySelector, type CategorySelectorItem } from "./category-selector";
 import { IngredientFields } from "./ingredient-fields";
 import { InstructionFields } from "./instruction-fields";
 
+export type RecipeFormDefaultValues = {
+  title: string;
+  description: string;
+  imageUrl: string;
+  cookingTime: number | null;
+  ingredientLines: string[];
+  instructionSteps: string[];
+  categoryIds: string[];
+};
+
 type RecipeFormProps = {
   categories: CategorySelectorItem[];
+  mode?: "create" | "edit";
+  initialSlug?: string;
+  defaultValues?: RecipeFormDefaultValues;
 };
 
 type FieldKey =
@@ -23,10 +42,6 @@ type FieldKey =
 
 type FieldErrorsState = Partial<Record<FieldKey, string>>;
 
-function trimNonEmptyLines(lines: string[]): string[] {
-  return lines.map((l) => l.trim()).filter((l) => l.length > 0);
-}
-
 function validateClientFields(input: {
   title: string;
   ingredientLines: string[];
@@ -34,23 +49,14 @@ function validateClientFields(input: {
   cookingTimeRaw: string;
 }): FieldErrorsState {
   const errors: FieldErrorsState = {};
-  if (!input.title.trim()) {
-    errors.title = "Title is required.";
-  }
-  if (trimNonEmptyLines(input.ingredientLines).length === 0) {
-    errors.ingredients = "Add at least one ingredient line with text.";
-  }
-  if (trimNonEmptyLines(input.instructionSteps).length === 0) {
-    errors.instructions = "Add at least one instruction step with text.";
-  }
-  const raw = input.cookingTimeRaw.trim();
-  if (raw.length > 0) {
-    const n = Number(raw);
-    if (!Number.isFinite(n) || !Number.isInteger(n) || n < 0) {
-      errors.cookingTime =
-        "Cooking time must be a whole number of minutes (0 or more), or leave blank.";
-    }
-  }
+  const titleErr = validateTitle(input.title);
+  if (titleErr) errors.title = titleErr;
+  const ingErr = validateIngredientLines(input.ingredientLines);
+  if (ingErr) errors.ingredients = ingErr;
+  const insErr = validateInstructionSteps(input.instructionSteps);
+  if (insErr) errors.instructions = insErr;
+  const ctErr = validateCookingTimeRaw(input.cookingTimeRaw);
+  if (ctErr) errors.cookingTime = ctErr;
   return errors;
 }
 
@@ -69,20 +75,48 @@ function mapServerErrorToFields(message: string): FieldErrorsState {
   if (msg.includes("categories are invalid")) {
     return { categories: msg };
   }
+  if (msg === "Recipe not found.") {
+    return { general: msg };
+  }
   return { general: msg };
 }
 
-export function RecipeForm({ categories }: RecipeFormProps) {
+function linesOrPlaceholder(lines: string[] | undefined): string[] {
+  if (lines && lines.length > 0) return lines;
+  return [""];
+}
+
+export function RecipeForm({
+  categories,
+  mode = "create",
+  initialSlug,
+  defaultValues,
+}: RecipeFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const isEdit = mode === "edit";
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [cookingTimeRaw, setCookingTimeRaw] = useState("");
-  const [ingredientLines, setIngredientLines] = useState<string[]>([""]);
-  const [instructionSteps, setInstructionSteps] = useState<string[]>([""]);
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+  const [title, setTitle] = useState(
+    () => defaultValues?.title ?? "",
+  );
+  const [description, setDescription] = useState(
+    () => defaultValues?.description ?? "",
+  );
+  const [imageUrl, setImageUrl] = useState(() => defaultValues?.imageUrl ?? "");
+  const [cookingTimeRaw, setCookingTimeRaw] = useState(() =>
+    defaultValues?.cookingTime != null
+      ? String(defaultValues.cookingTime)
+      : "",
+  );
+  const [ingredientLines, setIngredientLines] = useState(() =>
+    linesOrPlaceholder(defaultValues?.ingredientLines),
+  );
+  const [instructionSteps, setInstructionSteps] = useState(() =>
+    linesOrPlaceholder(defaultValues?.instructionSteps),
+  );
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
+    () => defaultValues?.categoryIds ?? [],
+  );
   const [fieldErrors, setFieldErrors] = useState<FieldErrorsState>({});
 
   function clearFieldError(...keys: FieldKey[]) {
@@ -163,17 +197,38 @@ export function RecipeForm({ categories }: RecipeFormProps) {
     const cookingTime =
       cookingTrim.length === 0 ? null : Number.parseInt(cookingTrim, 10);
 
-    startTransition(async () => {
-      const result = await createRecipe({
-        title,
-        description: description.trim() || undefined,
-        imageUrl: imageUrl.trim() || undefined,
-        cookingTime,
-        ingredientLines,
-        instructionSteps,
-        categoryIds: selectedCategoryIds,
-      });
+    const payload = {
+      title,
+      description: description.trim() || undefined,
+      imageUrl: imageUrl.trim() || undefined,
+      cookingTime,
+      ingredientLines,
+      instructionSteps,
+      categoryIds: selectedCategoryIds,
+    };
 
+    startTransition(async () => {
+      if (isEdit) {
+        if (!initialSlug) {
+          setFieldErrors({
+            general: "Missing recipe slug. Reload the page and try again.",
+          });
+          return;
+        }
+        const result = await updateRecipe({
+          initialSlug,
+          ...payload,
+        });
+        if (!result.success) {
+          setFieldErrors(mapServerErrorToFields(result.error));
+          return;
+        }
+        router.push(`/recipes/${result.slug}`);
+        router.refresh();
+        return;
+      }
+
+      const result = await createRecipe(payload);
       if (!result.success) {
         setFieldErrors(mapServerErrorToFields(result.error));
         return;
@@ -310,7 +365,7 @@ export function RecipeForm({ categories }: RecipeFormProps) {
           disabled={isPending}
           className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
         >
-          {isPending ? "Saving…" : "Create recipe"}
+          {isPending ? "Saving…" : isEdit ? "Save changes" : "Create recipe"}
         </button>
       </div>
     </form>
