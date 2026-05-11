@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { RecipeCard } from "@/components/recipes/recipe-card";
 import { getRecipes } from "@/lib/recipes";
 
@@ -6,7 +8,15 @@ export default async function RecipesPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8 space-y-6">
-      <h1 className="text-2xl font-bold">Recipes</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold">Recipes</h1>
+        <Link
+          href="/recipes/new"
+          className="rounded border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white"
+        >
+          Add recipe
+        </Link>
+      </div>
       <ul className="space-y-4 list-none p-0 m-0">
         {recipes.map((recipe) => (
           <li key={recipe.id}>
