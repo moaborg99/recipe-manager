@@ -11,6 +11,7 @@ export default async function RecipesPage() {
         {recipes.map((recipe) => (
           <li key={recipe.id}>
             <RecipeCard
+              slug={recipe.slug}
               title={recipe.title}
               description={recipe.description}
               imageUrl={recipe.imageUrl}
