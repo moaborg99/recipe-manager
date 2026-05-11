@@ -29,3 +29,12 @@ export async function getRecipeBySlug(slug: string) {
 }
 
 export type RecipeDetail = NonNullable<Awaited<ReturnType<typeof getRecipeBySlug>>>;
+
+export async function getCategories() {
+  return prisma.category.findMany({
+    orderBy: { title: "asc" },
+    select: { id: true, title: true, slug: true },
+  });
+}
+
+export type CategoryOption = Awaited<ReturnType<typeof getCategories>>[number];
