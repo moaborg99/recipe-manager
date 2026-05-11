@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Recipe {
+  id           String           @id @default(cuid())
+  title        String
+  slug         String           @unique
+  description  String?
+  imageUrl     String?
+  ingredients  String
+  instructions String
+  cookingTime  Int?
+  publishedAt  DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  categories   RecipeCategory[]
+}
+
+model Category {
+  id      String           @id @default(cuid())
+  title   String
+  slug    String           @unique
+
+  recipes RecipeCategory[]
+}
+
+model RecipeCategory {
+  recipeId   String
+  categoryId String
+
+  recipe   Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([recipeId, categoryId])
+  @@index([categoryId])
+}
