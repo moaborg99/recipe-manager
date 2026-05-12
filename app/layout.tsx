@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -27,7 +28,22 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <header className="border-b border-zinc-200 bg-white shrink-0">
+          <nav className="mx-auto max-w-4xl px-4 py-3 flex flex-wrap gap-4 text-sm">
+            <Link href="/" className="text-zinc-800 hover:underline">
+              Home
+            </Link>
+            <Link href="/recipes" className="text-zinc-800 hover:underline">
+              Recipes
+            </Link>
+            <Link href="/categories" className="text-zinc-800 hover:underline">
+              Categories
+            </Link>
+          </nav>
+        </header>
+        <div className="flex-1">{children}</div>
+      </body>
     </html>
   );
 }
