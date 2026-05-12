@@ -1,26 +1,45 @@
 @import "tailwindcss";
 
+/* Figma tokens. Page canvas: --background. Tailwind: bg-primary = brand green; bg-background = surface (legacy utilities). */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #18542a;
+  --header: #0f3318;
+  --surface: #ffffff;
+  --primary: #18542a;
+  --accent: #d4c49a;
+  --destructive: #d52518;
+  --text-on-dark: #ffffff;
+  --text-on-light: #18542a;
+  --muted-text: rgba(24, 84, 42, 0.7);
+  --subtle-border: rgba(24, 84, 42, 0.15);
+  --input-border: rgba(24, 84, 42, 0.2);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --color-background: var(--surface);
+  --color-foreground: var(--header);
+  --color-header: var(--header);
+  --color-surface: var(--surface);
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
+  --color-destructive: var(--destructive);
+  --color-text-on-dark: var(--text-on-dark);
+  --color-text-on-light: var(--text-on-light);
+  --color-muted-text: var(--muted-text);
+  --color-subtle-border: var(--subtle-border);
+  --color-input-border: var(--input-border);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  min-height: 100%;
+  background: var(--background);
 }
 
 body {
+  min-height: 100%;
   background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--text-on-dark);
 }
