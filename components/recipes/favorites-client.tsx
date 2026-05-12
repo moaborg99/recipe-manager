@@ -93,7 +93,7 @@ export function FavoritesClient() {
           <Link href="/recipes" className="underline">
             all recipes
           </Link>{" "}
-          and tap the star to save them here.
+            and tap the heart to save them here.
         </p>
       </div>
     );
