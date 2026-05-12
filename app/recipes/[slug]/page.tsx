@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { DeleteRecipeButton } from "@/components/recipes/delete-recipe-button";
+import { FavoriteButton } from "@/components/recipes/favorite-button";
 import { getRecipeBySlug } from "@/lib/recipes";
 
 export default async function RecipeDetailPage(
@@ -34,6 +35,7 @@ export default async function RecipeDetailPage(
         <div className="flex flex-wrap items-start justify-between gap-3">
           <h1 className="text-2xl font-bold m-0">{recipe.title}</h1>
           <div className="flex flex-wrap items-center gap-2">
+            <FavoriteButton slug={slug} />
             <Link
               href={`/recipes/${slug}/edit`}
               className="rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium text-zinc-800 hover:bg-zinc-50"
