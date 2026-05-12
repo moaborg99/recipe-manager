@@ -37,6 +37,9 @@ export default function RootLayout({
             <Link href="/recipes" className="text-zinc-800 hover:underline">
               Recipes
             </Link>
+            <Link href="/favorites" className="text-zinc-800 hover:underline">
+              Favorites
+            </Link>
             <Link href="/categories" className="text-zinc-800 hover:underline">
               Categories
             </Link>
