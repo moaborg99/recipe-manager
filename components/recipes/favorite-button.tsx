@@ -2,6 +2,7 @@
 
 import { useCallback, useSyncExternalStore } from "react";
 
+import { HeartToggleIcon } from "@/components/ui/heart-toggle-icon";
 import { cn } from "@/components/ui/cn";
 import {
   dispatchFavoritesChanged,
@@ -58,9 +59,7 @@ export function FavoriteButton({ slug, className }: FavoriteButtonProps) {
         className,
       )}
     >
-      <span aria-hidden className="select-none text-lg leading-none">
-        {favorited ? "♥" : "♡"}
-      </span>
+      <HeartToggleIcon filled={favorited} size={18} />
       <span className="sr-only">
         {favorited ? "Saved recipe" : "Save recipe"}
       </span>
