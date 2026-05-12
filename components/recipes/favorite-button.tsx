@@ -2,6 +2,7 @@
 
 import { useCallback, useSyncExternalStore } from "react";
 
+import { cn } from "@/components/ui/cn";
 import {
   dispatchFavoritesChanged,
   FAVORITES_CHANGED_EVENT,
@@ -12,9 +13,10 @@ import {
 
 type FavoriteButtonProps = {
   slug: string;
+  className?: string;
 };
 
-export function FavoriteButton({ slug }: FavoriteButtonProps) {
+export function FavoriteButton({ slug, className }: FavoriteButtonProps) {
   const subscribe = useCallback((onStoreChange: () => void) => {
     const onCustom = () => onStoreChange();
     const onStorage = (e: StorageEvent) => {
@@ -39,16 +41,25 @@ export function FavoriteButton({ slug }: FavoriteButtonProps) {
   return (
     <button
       type="button"
-      onClick={() => {
+      onClick={(e) => {
+        e.stopPropagation();
         toggleFavoriteSlug(slug);
         dispatchFavoritesChanged();
       }}
       aria-pressed={favorited}
       title={favorited ? "Remove from saved recipes" : "Save recipe"}
-      className="inline-flex h-9 min-w-9 shrink-0 items-center justify-center rounded border border-zinc-300 bg-white px-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50 aria-pressed:border-amber-600 aria-pressed:bg-amber-50 aria-pressed:text-amber-900"
+      className={cn(
+        "inline-flex h-10 min-w-10 shrink-0 items-center justify-center rounded-full border px-2.5 text-sm font-medium shadow-sm transition-all duration-200 ease-out",
+        "hover:scale-105 active:scale-95",
+        "focus-visible:z-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+        favorited
+          ? "border-destructive bg-destructive text-text-on-dark hover:bg-destructive/90"
+          : "border-input-border bg-surface/95 text-text-on-light backdrop-blur-sm hover:bg-surface",
+        className,
+      )}
     >
-      <span aria-hidden className="select-none">
-        {favorited ? "★" : "☆"}
+      <span aria-hidden className="select-none text-lg leading-none">
+        {favorited ? "♥" : "♡"}
       </span>
       <span className="sr-only">
         {favorited ? "Saved recipe" : "Save recipe"}

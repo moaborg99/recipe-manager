@@ -3,6 +3,9 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { Input } from "@/components/ui/input";
+import { cn } from "@/components/ui/cn";
+
 export type RecipeFiltersCategory = {
   slug: string;
   title: string;
@@ -19,6 +22,41 @@ const SEARCH_DEBOUNCE_MS = 400;
 function buildUrl(pathname: string, params: URLSearchParams): string {
   const q = params.toString();
   return q ? `${pathname}?${q}` : pathname;
+}
+
+function categoryPillClass(active: boolean) {
+  return cn(
+    "inline-flex cursor-pointer items-center justify-center rounded-full border px-3.5 py-2 text-xs font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:px-4 sm:text-sm",
+    active
+      ? "border-subtle-border bg-accent text-header hover:opacity-90"
+      : "border-subtle-border bg-surface text-text-on-light hover:bg-accent/15",
+  );
+}
+
+function SearchIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn("text-muted-text", className)}
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden
+    >
+      <path
+        d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      />
+      <path
+        d="M16.5 16.5 21 21"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
 }
 
 export function RecipeFilters({
@@ -76,46 +114,61 @@ export function RecipeFilters({
     searchDraft.trim().length > 0 || categoryFromUrl.length > 0;
 
   return (
-    <div className="space-y-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="min-w-[12rem] flex-1 space-y-1">
-          <label htmlFor="recipe-search" className="text-sm font-medium">
-            Search
-          </label>
-          <input
-            id="recipe-search"
-            type="search"
-            value={searchDraft}
-            onChange={(e) => setSearchDraft(e.target.value)}
-            placeholder="Title or description…"
-            className="w-full rounded border border-zinc-300 bg-white px-2 py-1.5 text-sm"
-            autoComplete="off"
-          />
-        </div>
-        <div className="space-y-1">
-          <label htmlFor="recipe-category-filter" className="text-sm font-medium">
-            Category
-          </label>
-          <select
-            id="recipe-category-filter"
-            value={categoryFromUrl}
-            onChange={(e) => applyCategory(e.target.value)}
-            className="min-w-[10rem] rounded border border-zinc-300 bg-white px-2 py-1.5 text-sm"
-          >
-            <option value="">All categories</option>
-            {categories.map((c) => (
-              <option key={c.slug} value={c.slug}>
-                {c.title}
-              </option>
-            ))}
-          </select>
-        </div>
+    <div className="space-y-6">
+      <div className="relative w-full min-w-0">
+        <span
+          className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-muted-text"
+          aria-hidden
+        >
+          <SearchIcon className="block" />
+        </span>
+        <Input
+          id="recipe-search"
+          type="search"
+          value={searchDraft}
+          onChange={(e) => setSearchDraft(e.target.value)}
+          placeholder="Search recipes..."
+          aria-label="Search recipes"
+          className="min-h-12 rounded-lg border-subtle-border py-3.5 pl-11 pr-4 text-base leading-snug shadow-sm"
+          autoComplete="off"
+        />
       </div>
+
+      {categories.length > 0 ? (
+        <div className="space-y-5">
+          <p className="m-0 mb-2 text-sm font-medium text-text-on-dark sm:text-base">
+            Filter by category
+          </p>
+          <div className="flex flex-wrap gap-2 sm:gap-2.5">
+            <button
+              type="button"
+              className={categoryPillClass(categoryFromUrl === "")}
+              onClick={() => applyCategory("")}
+            >
+              All
+            </button>
+            {categories.map((c) => {
+              const active = categoryFromUrl === c.slug;
+              return (
+                <button
+                  key={c.slug}
+                  type="button"
+                  className={categoryPillClass(active)}
+                  onClick={() => applyCategory(c.slug)}
+                >
+                  {c.title}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+
       {hasFilters ? (
         <button
           type="button"
           onClick={clearFilters}
-          className="text-sm text-zinc-700 underline underline-offset-2 hover:text-zinc-900"
+          className="text-sm font-medium text-text-on-dark underline underline-offset-2 transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           Clear filters
         </button>
