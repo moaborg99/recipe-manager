@@ -99,7 +99,11 @@ export function SiteHeader() {
             )}
             aria-current={favoritesActive ? "page" : undefined}
           >
-            <HeartToggleIcon filled={hasSaved} size={22} className="text-text-on-dark" />
+            <HeartToggleIcon
+              filled={hasSaved}
+              size={22}
+              className={hasSaved ? "text-destructive" : "text-text-on-dark"}
+            />
             {hasSaved ? (
               <span
                 className="min-w-[1.25rem] px-1.5 py-0.5 text-center text-xs font-semibold tabular-nums text-text-on-dark"

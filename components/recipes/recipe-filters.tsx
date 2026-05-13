@@ -26,10 +26,10 @@ function buildUrl(pathname: string, params: URLSearchParams): string {
 
 function categoryPillClass(active: boolean) {
   return cn(
-    "inline-flex cursor-pointer items-center justify-center rounded-full border px-3.5 py-2 text-xs font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:px-4 sm:text-sm",
+    "inline-flex cursor-pointer items-center justify-center rounded-full border px-3.5 py-2 text-xs font-medium transition-[color,box-shadow,filter] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:px-4 sm:text-sm",
     active
-      ? "border-subtle-border bg-accent text-header hover:opacity-90"
-      : "border-subtle-border bg-surface text-text-on-light hover:bg-accent/15",
+      ? "border-subtle-border bg-accent text-header hover:brightness-[1.04]"
+      : "border-subtle-border bg-surface text-text-on-light hover:shadow-md hover:shadow-black/[0.08] hover:ring-2 hover:ring-white/90",
   );
 }
 
