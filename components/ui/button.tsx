@@ -17,7 +17,26 @@ const variantClass: Record<"primary" | "accent" | "destructive", string> = {
     "border border-destructive bg-destructive text-text-on-dark hover:opacity-90",
 };
 
+const buttonLayoutClass =
+  "inline-flex cursor-pointer items-center justify-center rounded px-3 py-1.5 text-sm font-medium transition-colors";
+
 export type ButtonVariant = keyof typeof variantClass;
+
+/**
+ * Same surface styles as `Button` for use on `Link` or other non-button elements.
+ * Omits `disabled:*` utilities (not meaningful on anchors).
+ */
+export function composeButtonClassName(
+  variant: ButtonVariant,
+  className?: string,
+) {
+  return cn(
+    buttonLayoutClass,
+    focusClass,
+    variantClass[variant],
+    className,
+  );
+}
 
 export type ButtonProps = ComponentPropsWithoutRef<"button"> & {
   variant?: ButtonVariant;
@@ -30,9 +49,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         type={type}
         className={cn(
-          "inline-flex cursor-pointer items-center justify-center rounded px-3 py-1.5 text-sm font-medium transition-colors",
-          focusClass,
-          variantClass[variant],
+          composeButtonClassName(variant),
           disabledClass,
           className,
         )}
