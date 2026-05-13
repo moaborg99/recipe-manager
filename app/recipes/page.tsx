@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 import { RecipeCard } from "@/components/recipes/recipe-card";
 import { RecipeFilters } from "@/components/recipes/recipe-filters";
+import { RecipeGrid, RecipeGridItem } from "@/components/recipes/recipe-grid";
 import { cn } from "@/components/ui/cn";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageContainer } from "@/components/ui/page-container";
@@ -77,9 +78,9 @@ export default async function RecipesPage(props: PageProps<"/recipes">) {
           }
         />
       ) : (
-        <ul className="m-0 grid list-none grid-cols-1 gap-6 p-0 md:grid-cols-2 lg:grid-cols-3">
+        <RecipeGrid>
           {recipes.map((recipe) => (
-            <li key={recipe.id} className="h-full min-w-0">
+            <RecipeGridItem key={recipe.id}>
               <RecipeCard
                 slug={recipe.slug}
                 title={recipe.title}
@@ -88,9 +89,9 @@ export default async function RecipesPage(props: PageProps<"/recipes">) {
                 cookingTime={recipe.cookingTime}
                 categoryTitles={recipe.categories.map((rc) => rc.category.title)}
               />
-            </li>
+            </RecipeGridItem>
           ))}
-        </ul>
+        </RecipeGrid>
       )}
     </PageContainer>
   );
