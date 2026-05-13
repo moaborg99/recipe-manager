@@ -5,12 +5,27 @@ import { useCallback, useEffect, useState } from "react";
 
 import { getFavoriteRecipesBySlugs } from "@/actions/favorite-actions";
 import { RecipeCard } from "@/components/recipes/recipe-card";
+import { RecipeGrid, RecipeGridItem } from "@/components/recipes/recipe-grid";
+import { cn } from "@/components/ui/cn";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
 import {
   FAVORITES_CHANGED_EVENT,
   FAVORITES_STORAGE_KEY,
   getFavoriteSlugs,
 } from "@/lib/favorites";
 import type { RecipeWithCategories } from "@/lib/recipes";
+
+const browseRecipesLinkClass = cn(
+  "inline-flex items-center justify-center rounded px-3 py-1.5 text-sm font-medium transition-colors",
+  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+  "border border-subtle-border bg-surface text-text-on-light hover:bg-accent/15",
+);
+
+function savedCountDescription(count: number): string {
+  if (count === 1) return "1 recipe saved";
+  return `${count} recipes saved`;
+}
 
 export function FavoritesClient() {
   const [recipes, setRecipes] = useState<RecipeWithCategories[]>([]);
@@ -57,62 +72,65 @@ export function FavoritesClient() {
     };
   }, [load]);
 
-  if (loading) {
-    return (
-      <div
-        className="h-32 animate-pulse rounded-lg border border-zinc-200 bg-zinc-100"
-        aria-busy
-        aria-label="Loading saved recipes"
-      />
-    );
-  }
-
-  if (recipes.length === 0) {
-    if (missingFromCatalog) {
-      return (
-        <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-6 text-center text-sm text-zinc-700">
-          <p className="m-0 font-medium text-zinc-900">
-            Saved recipes not found
-          </p>
-          <p className="mt-2 mb-0">
-            Nothing in the database matched your saved slugs. The recipes may
-            have been removed.{" "}
-            <Link href="/recipes" className="underline">
-              Browse recipes
-            </Link>
-            .
-          </p>
-        </div>
-      );
-    }
-    return (
-      <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-6 text-center text-sm text-zinc-700">
-        <p className="m-0 font-medium text-zinc-900">No saved recipes yet.</p>
-        <p className="mt-2 mb-0">
-          Browse{" "}
-          <Link href="/recipes" className="underline">
-            all recipes
-          </Link>{" "}
-            and tap the heart to save them here.
-        </p>
-      </div>
-    );
-  }
+  const countDescription = loading
+    ? "Loading saved recipes…"
+    : savedCountDescription(recipes.length);
 
   return (
-    <ul className="m-0 list-none space-y-4 p-0">
-      {recipes.map((recipe) => (
-        <li key={recipe.id}>
-          <RecipeCard
-            slug={recipe.slug}
-            title={recipe.title}
-            description={recipe.description}
-            imageUrl={recipe.imageUrl}
-            cookingTime={recipe.cookingTime}
-            categoryTitles={recipe.categories.map((rc) => rc.category.title)}
+    <div className="space-y-8">
+      <PageHeader size="lg" title="Favorites" description={countDescription} />
+
+      {loading ? (
+        <div
+          className="h-28 w-full animate-pulse rounded-lg bg-white/15 sm:h-32"
+          aria-busy="true"
+          aria-label="Loading saved recipes"
+        />
+      ) : recipes.length === 0 ? (
+        missingFromCatalog ? (
+          <EmptyState
+            title="Saved recipes not found"
+            description={
+              <span>
+                Nothing in the database matched your saved slugs. The recipes may
+                have been removed.{" "}
+                <Link href="/recipes" className={browseRecipesLinkClass}>
+                  Browse recipes
+                </Link>
+                .
+              </span>
+            }
           />
-        </li>
-      ))}
-    </ul>
+        ) : (
+          <EmptyState
+            title="No saved recipes yet"
+            description={
+              <span>
+                Browse{" "}
+                <Link href="/recipes" className={browseRecipesLinkClass}>
+                  all recipes
+                </Link>{" "}
+                and tap the heart to save them here.
+              </span>
+            }
+          />
+        )
+      ) : (
+        <RecipeGrid>
+          {recipes.map((recipe) => (
+            <RecipeGridItem key={recipe.id}>
+              <RecipeCard
+                slug={recipe.slug}
+                title={recipe.title}
+                description={recipe.description}
+                imageUrl={recipe.imageUrl}
+                cookingTime={recipe.cookingTime}
+                categoryTitles={recipe.categories.map((rc) => rc.category.title)}
+              />
+            </RecipeGridItem>
+          ))}
+        </RecipeGrid>
+      )}
+    </div>
   );
 }

@@ -1,19 +1,16 @@
 import type { Metadata } from "next";
 
 import { FavoritesClient } from "@/components/recipes/favorites-client";
+import { PageContainer } from "@/components/ui/page-container";
 
 export const metadata: Metadata = {
-  title: "Saved recipes",
+  title: "Favorites",
 };
 
 export default function FavoritesPage() {
   return (
-    <main className="mx-auto max-w-2xl space-y-6 px-4 py-8">
-      <h1 className="text-2xl font-bold">Saved recipes</h1>
-      <p className="text-sm text-zinc-600 m-0">
-        Favorites are stored in this browser only.
-      </p>
+    <PageContainer as="main" maxWidthClass="max-w-6xl" className="space-y-8">
       <FavoritesClient />
-    </main>
+    </PageContainer>
   );
 }
