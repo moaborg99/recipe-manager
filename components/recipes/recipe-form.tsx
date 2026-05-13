@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { type FormEvent, useState, useTransition } from "react";
 
 import { createRecipe, updateRecipe } from "@/actions/recipe-actions";
 import {
@@ -10,6 +11,10 @@ import {
   validateInstructionSteps,
   validateTitle,
 } from "@/lib/recipe-validation";
+import { Button, composeButtonClassName } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/components/ui/cn";
 
 import { CategorySelector, type CategorySelectorItem } from "./category-selector";
 import { IngredientFields } from "./ingredient-fields";
@@ -85,6 +90,9 @@ function linesOrPlaceholder(lines: string[] | undefined): string[] {
   if (lines && lines.length > 0) return lines;
   return [""];
 }
+
+const labelClass =
+  "block text-sm font-medium text-text-on-light leading-snug";
 
 export function RecipeForm({
   categories,
@@ -178,7 +186,7 @@ export function RecipeForm({
     clearFieldError("categories", "general");
   }
 
-  function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setFieldErrors({});
 
@@ -239,93 +247,85 @@ export function RecipeForm({
     });
   }
 
-  const inputErrorClass = "border-red-400 ring-1 ring-red-200";
+  const controlClass =
+    "min-h-11 rounded-lg border border-input-border px-3 py-2.5 text-base leading-snug text-text-on-light sm:text-sm";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-xl">
-      <div className="space-y-1">
-        <label htmlFor="recipe-title" className="text-sm font-medium">
-          Title <span className="text-red-600">*</span>
-        </label>
-        <input
-          id="recipe-title"
-          type="text"
-          value={title}
-          onChange={(e) => {
-            setTitle(e.target.value);
-            clearFieldError("title", "general");
-          }}
-          aria-invalid={fieldErrors.title ? true : undefined}
-          aria-describedby={fieldErrors.title ? "recipe-title-error" : undefined}
-          className={`w-full rounded border px-2 py-1.5 text-sm ${
-            fieldErrors.title ? inputErrorClass : "border-zinc-300"
-          }`}
-          placeholder="Recipe name"
-        />
-        {fieldErrors.title ? (
-          <p id="recipe-title-error" className="m-0 text-sm text-red-800" role="alert">
-            {fieldErrors.title}
-          </p>
-        ) : null}
+    <form onSubmit={handleSubmit} className="space-y-8">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
+        <div className="min-w-0 space-y-1.5">
+          <label htmlFor="recipe-title" className={labelClass}>
+            Recipe title <span className="text-destructive">*</span>
+          </label>
+          <Input
+            id="recipe-title"
+            type="text"
+            value={title}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              clearFieldError("title", "general");
+            }}
+            error={fieldErrors.title}
+            placeholder="Recipe name"
+            className={controlClass}
+          />
+        </div>
+
+        <div className="min-w-0 space-y-1.5">
+          <label htmlFor="recipe-time" className={labelClass}>
+            Cooking time (minutes)
+          </label>
+          <Input
+            id="recipe-time"
+            type="number"
+            min={0}
+            step={1}
+            value={cookingTimeRaw}
+            onChange={(e) => {
+              setCookingTimeRaw(e.target.value);
+              clearFieldError("cookingTime", "general");
+            }}
+            error={fieldErrors.cookingTime}
+            placeholder="Optional"
+            className={controlClass}
+          />
+        </div>
       </div>
 
-      <div className="space-y-1">
-        <label htmlFor="recipe-description" className="text-sm font-medium">
+      <div className="space-y-1.5">
+        <label htmlFor="recipe-description" className={labelClass}>
           Description
         </label>
-        <textarea
+        <Textarea
           id="recipe-description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          rows={3}
-          className="w-full rounded border border-zinc-300 px-2 py-1.5 text-sm"
+          rows={5}
           placeholder="Short summary (optional)"
+          className={controlClass}
         />
       </div>
 
-      <div className="space-y-1">
-        <label htmlFor="recipe-image" className="text-sm font-medium">
+      <div className="space-y-1.5">
+        <label htmlFor="recipe-image" className={labelClass}>
           Image URL
         </label>
-        <input
+        <Input
           id="recipe-image"
           type="url"
           value={imageUrl}
           onChange={(e) => setImageUrl(e.target.value)}
-          className="w-full rounded border border-zinc-300 px-2 py-1.5 text-sm"
           placeholder="https://…"
+          className={controlClass}
         />
       </div>
 
-      <div className="space-y-1">
-        <label htmlFor="recipe-time" className="text-sm font-medium">
-          Cooking time (minutes)
-        </label>
-        <input
-          id="recipe-time"
-          type="number"
-          min={0}
-          step={1}
-          value={cookingTimeRaw}
-          onChange={(e) => {
-            setCookingTimeRaw(e.target.value);
-            clearFieldError("cookingTime", "general");
-          }}
-          aria-invalid={fieldErrors.cookingTime ? true : undefined}
-          aria-describedby={
-            fieldErrors.cookingTime ? "recipe-time-error" : undefined
-          }
-          className={`w-40 rounded border px-2 py-1.5 text-sm ${
-            fieldErrors.cookingTime ? inputErrorClass : "border-zinc-300"
-          }`}
-          placeholder="Optional"
-        />
-        {fieldErrors.cookingTime ? (
-          <p id="recipe-time-error" className="m-0 text-sm text-red-800" role="alert">
-            {fieldErrors.cookingTime}
-          </p>
-        ) : null}
-      </div>
+      <CategorySelector
+        categories={categories}
+        selectedIds={selectedCategoryIds}
+        onToggle={toggleCategory}
+        error={fieldErrors.categories}
+      />
 
       <IngredientFields
         lines={ingredientLines}
@@ -343,30 +343,35 @@ export function RecipeForm({
         error={fieldErrors.instructions}
       />
 
-      <CategorySelector
-        categories={categories}
-        selectedIds={selectedCategoryIds}
-        onToggle={toggleCategory}
-        error={fieldErrors.categories}
-      />
-
       {fieldErrors.general ? (
         <p
-          className="m-0 rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800"
+          className="m-0 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-sm text-text-on-light"
           role="alert"
         >
           {fieldErrors.general}
         </p>
       ) : null}
 
-      <div className="flex gap-3">
-        <button
+      <div className="flex flex-wrap items-center gap-3">
+        {!isEdit ? (
+          <Link
+            href="/recipes"
+            className={cn(
+              composeButtonClassName("destructive"),
+              "min-h-10 px-4 py-2 text-center no-underline",
+            )}
+          >
+            Cancel
+          </Link>
+        ) : null}
+        <Button
           type="submit"
+          variant="primary"
           disabled={isPending}
-          className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+          className="min-h-10 px-4 py-2"
         >
-          {isPending ? "Saving…" : isEdit ? "Save changes" : "Create recipe"}
-        </button>
+          {isPending ? "Saving…" : isEdit ? "Save changes" : "Create Recipe"}
+        </Button>
       </div>
     </form>
   );
