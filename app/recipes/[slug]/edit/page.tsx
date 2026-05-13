@@ -2,7 +2,18 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { RecipeForm, type RecipeFormDefaultValues } from "@/components/recipes/recipe-form";
+import { BackLink } from "@/components/ui/back-link";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/components/ui/cn";
+import { PageContainer } from "@/components/ui/page-container";
+import { PageHeader } from "@/components/ui/page-header";
 import { getCategories, getRecipeBySlug } from "@/lib/recipes";
+
+const secondaryNavLinkClass = cn(
+  "text-sm font-medium text-text-on-dark/80 underline-offset-2 transition-colors",
+  "hover:text-text-on-dark hover:underline",
+  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent rounded-sm px-1 py-0.5",
+);
 
 export default async function EditRecipePage(
   props: PageProps<"/recipes/[slug]/edit">,
@@ -30,23 +41,36 @@ export default async function EditRecipePage(
   };
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8 space-y-6">
-      <p className="flex flex-wrap gap-4 text-sm">
-        <Link href="/recipes" className="text-zinc-600 underline">
+    <PageContainer
+      as="main"
+      maxWidthClass="max-w-3xl"
+      className="space-y-6 sm:space-y-8"
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-2">
+        <BackLink href={`/recipes/${slug}`}>Back to recipe</BackLink>
+        <Link href="/recipes" className={secondaryNavLinkClass}>
           All recipes
         </Link>
-        <Link href={`/recipes/${slug}`} className="text-zinc-600 underline">
-          View recipe
-        </Link>
-      </p>
-      <h1 className="text-2xl font-bold">Edit recipe</h1>
-      <RecipeForm
-        key={recipe.id}
-        mode="edit"
-        initialSlug={slug}
-        categories={categories}
-        defaultValues={defaultValues}
+      </div>
+
+      <PageHeader
+        size="lg"
+        title="Edit Recipe"
+        description="Update the details below"
       />
-    </main>
+
+      <Card
+        padding="md"
+        className="rounded-xl border-0 shadow-md sm:p-8"
+      >
+        <RecipeForm
+          key={recipe.id}
+          mode="edit"
+          initialSlug={slug}
+          categories={categories}
+          defaultValues={defaultValues}
+        />
+      </Card>
+    </PageContainer>
   );
 }

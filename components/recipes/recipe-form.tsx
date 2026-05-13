@@ -353,24 +353,28 @@ export function RecipeForm({
       ) : null}
 
       <div className="flex flex-wrap items-center gap-3">
-        {!isEdit ? (
-          <Link
-            href="/recipes"
-            className={cn(
-              composeButtonClassName("destructive"),
-              "min-h-10 px-4 py-2 text-center no-underline",
-            )}
-          >
-            Cancel
-          </Link>
-        ) : null}
+        <Link
+          href={
+            isEdit && initialSlug ? `/recipes/${initialSlug}` : "/recipes"
+          }
+          className={cn(
+            composeButtonClassName("destructive"),
+            "min-h-10 px-4 py-2 text-center no-underline",
+          )}
+        >
+          Cancel
+        </Link>
         <Button
           type="submit"
           variant="primary"
           disabled={isPending}
           className="min-h-10 px-4 py-2"
         >
-          {isPending ? "Saving…" : isEdit ? "Save changes" : "Create Recipe"}
+          {isPending
+            ? "Saving…"
+            : isEdit
+              ? "Update Recipe"
+              : "Create Recipe"}
         </Button>
       </div>
     </form>
