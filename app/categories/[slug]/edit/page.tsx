@@ -1,7 +1,10 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { CategoryForm } from "@/components/categories/category-form";
+import { BackLink } from "@/components/ui/back-link";
+import { Card } from "@/components/ui/card";
+import { PageContainer } from "@/components/ui/page-container";
+import { PageHeader } from "@/components/ui/page-header";
 import { getCategoryBySlug } from "@/lib/categories";
 
 export default async function EditCategoryPage(
@@ -15,19 +18,30 @@ export default async function EditCategoryPage(
   }
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8 space-y-6">
-      <p className="flex flex-wrap gap-4 text-sm">
-        <Link href="/categories" className="text-zinc-600 underline">
-          All categories
-        </Link>
-      </p>
-      <h1 className="text-2xl font-bold">Edit category</h1>
-      <CategoryForm
-        key={category.id}
-        mode="edit"
-        initialSlug={slug}
-        defaultValues={{ title: category.title }}
+    <PageContainer
+      as="main"
+      maxWidthClass="max-w-3xl"
+      className="space-y-6 sm:space-y-8"
+    >
+      <BackLink href="/categories">Back to categories</BackLink>
+
+      <PageHeader
+        size="lg"
+        title="Edit Category"
+        description="Update the name below"
       />
-    </main>
+
+      <Card
+        padding="md"
+        className="rounded-xl border-0 shadow-md sm:p-8"
+      >
+        <CategoryForm
+          key={category.id}
+          mode="edit"
+          initialSlug={slug}
+          defaultValues={{ title: category.title }}
+        />
+      </Card>
+    </PageContainer>
   );
 }

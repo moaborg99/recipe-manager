@@ -1,12 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { type FormEvent, useState, useTransition } from "react";
 
 import {
   createCategory,
   updateCategory,
 } from "@/actions/category-actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export type CategoryFormDefaultValues = {
   title: string;
@@ -17,6 +19,12 @@ type CategoryFormProps = {
   initialSlug?: string;
   defaultValues?: CategoryFormDefaultValues;
 };
+
+const labelClass =
+  "block text-sm font-medium leading-snug text-text-on-light";
+
+const controlClass =
+  "min-h-11 rounded-lg border border-input-border px-3 py-2.5 text-base leading-snug text-text-on-light sm:text-sm";
 
 function mapServerError(message: string): { title?: string; general?: string } {
   const msg = message.trim();
@@ -36,7 +44,7 @@ export function CategoryForm({
   const [titleError, setTitleError] = useState<string | null>(null);
   const [generalError, setGeneralError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setTitleError(null);
     setGeneralError(null);
@@ -78,56 +86,63 @@ export function CategoryForm({
     });
   }
 
-  const inputErrorClass = "border-red-400 ring-1 ring-red-200";
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {generalError ? (
         <p
-          className="m-0 rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800"
+          className="m-0 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-sm text-text-on-light"
           role="alert"
         >
           {generalError}
         </p>
       ) : null}
 
-      <div className="space-y-1">
-        <label htmlFor="category-title" className="text-sm font-medium">
-          Title <span className="text-red-600">*</span>
+      <div className="space-y-1.5">
+        <label htmlFor="category-title" className={labelClass}>
+          Category name <span className="text-destructive">*</span>
         </label>
-        <input
-          id="category-title"
-          type="text"
-          value={title}
-          onChange={(e) => {
-            setTitle(e.target.value);
-            setTitleError(null);
-            setGeneralError(null);
-          }}
-          aria-invalid={titleError ? true : undefined}
-          aria-describedby={titleError ? "category-title-error" : undefined}
-          className={`w-full rounded border px-2 py-1.5 text-sm ${
-            titleError ? inputErrorClass : "border-zinc-300"
-          }`}
-          placeholder="Category name"
-        />
-        {titleError ? (
-          <p id="category-title-error" className="m-0 text-sm text-red-800" role="alert">
-            {titleError}
-          </p>
-        ) : null}
-        <p className="m-0 text-xs text-zinc-500">
-          URL slug is generated from the title on the server.
-        </p>
-      </div>
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-      >
-        {isPending ? "Saving…" : mode === "create" ? "Create category" : "Save changes"}
-      </button>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <Input
+              id="category-title"
+              type="text"
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                setTitleError(null);
+                setGeneralError(null);
+              }}
+              error={titleError ?? undefined}
+              placeholder="e.g., Asian Cuisine"
+              className={controlClass}
+            />
+            <p className="m-0 text-xs text-muted-text">
+              URL slug is generated from the title on the server.
+            </p>
+          </div>
+
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={isPending}
+            className="shrink-0 min-h-10 px-4 py-2 sm:self-start"
+          >
+            {isPending ? (
+              "Saving…"
+            ) : mode === "create" ? (
+              <span className="inline-flex items-center gap-1.5">
+                <span aria-hidden className="text-base font-semibold leading-none">
+                  +
+                </span>
+                Create category
+              </span>
+            ) : (
+              "Save changes"
+            )}
+          </Button>
+        </div>
+      </div>
     </form>
   );
 }

@@ -1,9 +1,12 @@
 "use client";
 
+import { Trash2 } from "@deemlol/next-icons";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { deleteCategory } from "@/actions/category-actions";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/components/ui/cn";
 
 type DeleteCategoryButtonProps = {
   slug: string;
@@ -37,16 +40,30 @@ export function DeleteCategoryButton({ slug, title }: DeleteCategoryButtonProps)
 
   return (
     <div className="space-y-1">
-      <button
+      <Button
         type="button"
+        variant="destructive"
         onClick={handleClick}
         disabled={isPending}
-        className="rounded border border-red-700 bg-white px-2 py-1 text-xs font-medium text-red-800 hover:bg-red-50 disabled:opacity-50"
+        aria-label={`Delete category ${title}`}
+        className={cn(
+          "min-h-10 min-w-10 shrink-0 gap-0 px-0 py-0 sm:min-w-[2.75rem]",
+          "inline-flex items-center justify-center",
+        )}
       >
-        {isPending ? "…" : "Delete"}
-      </button>
+        {isPending ? (
+          <span className="text-sm">…</span>
+        ) : (
+          <Trash2
+            aria-hidden
+            size={18}
+            strokeWidth={2}
+            className="shrink-0 text-current"
+          />
+        )}
+      </Button>
       {error ? (
-        <p className="m-0 text-xs text-red-700" role="alert">
+        <p className="m-0 max-w-[12rem] text-xs text-destructive" role="alert">
           {error}
         </p>
       ) : null}
