@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import { FavoriteButton } from "@/components/recipes/favorite-button";
@@ -35,15 +34,14 @@ export function RecipeCard({
         "shadow-sm transition-shadow duration-300 ease-out hover:shadow-md",
       )}
     >
-      <div className="relative z-0 aspect-[4/3] w-full shrink-0 overflow-hidden bg-surface">
+      <div className="relative z-0 aspect-[4/3] w-full shrink-0 overflow-hidden rounded-t-xl bg-surface">
         {imageUrl ? (
-          <Image
+          <img
             src={imageUrl}
             alt=""
-            fill
-            className="object-cover transition-transform duration-300 ease-out will-change-transform group-hover:scale-[1.04]"
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            unoptimized
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 block h-full w-full object-cover transition-transform duration-300 ease-out [transform-origin:center] group-hover:scale-[1.04]"
           />
         ) : null}
       </div>
