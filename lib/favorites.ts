@@ -68,3 +68,18 @@ export function dispatchFavoritesChanged(): void {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent(FAVORITES_CHANGED_EVENT));
 }
+
+/** Drops slugs that are not in the catalog. Returns true if localStorage was updated. */
+export function pruneFavoriteSlugsToCatalog(validSlugs: string[]): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  const valid = new Set(validSlugs);
+  const current = getFavoriteSlugs();
+  const next = current.filter((slug) => valid.has(slug));
+  if (next.length === current.length) {
+    return false;
+  }
+  writeSlugs(next);
+  return true;
+}

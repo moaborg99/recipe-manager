@@ -10,9 +10,11 @@ import { cn } from "@/components/ui/cn";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import {
+  dispatchFavoritesChanged,
   FAVORITES_CHANGED_EVENT,
   FAVORITES_STORAGE_KEY,
   getFavoriteSlugs,
+  pruneFavoriteSlugsToCatalog,
 } from "@/lib/favorites";
 import type { RecipeWithCategories } from "@/lib/recipes";
 
@@ -30,21 +32,21 @@ function savedCountDescription(count: number): string {
 export function FavoritesClient() {
   const [recipes, setRecipes] = useState<RecipeWithCategories[]>([]);
   const [loading, setLoading] = useState(true);
-  const [missingFromCatalog, setMissingFromCatalog] = useState(false);
 
   const load = useCallback(async () => {
     const slugs = getFavoriteSlugs();
     if (slugs.length === 0) {
       setRecipes([]);
-      setMissingFromCatalog(false);
       setLoading(false);
       return;
     }
     setLoading(true);
     try {
       const data = await getFavoriteRecipesBySlugs(slugs);
+      if (pruneFavoriteSlugsToCatalog(data.map((recipe) => recipe.slug))) {
+        dispatchFavoritesChanged();
+      }
       setRecipes(data);
-      setMissingFromCatalog(slugs.length > 0 && data.length === 0);
     } finally {
       setLoading(false);
     }
@@ -87,34 +89,18 @@ export function FavoritesClient() {
           aria-label="Loading saved recipes"
         />
       ) : recipes.length === 0 ? (
-        missingFromCatalog ? (
-          <EmptyState
-            title="Saved recipes not found"
-            description={
-              <span>
-                Nothing in the database matched your saved slugs. The recipes may
-                have been removed.{" "}
-                <Link href="/recipes" className={browseRecipesLinkClass}>
-                  Browse recipes
-                </Link>
-                .
-              </span>
-            }
-          />
-        ) : (
-          <EmptyState
-            title="No saved recipes yet"
-            description={
-              <span>
-                Browse{" "}
-                <Link href="/recipes" className={browseRecipesLinkClass}>
-                  all recipes
-                </Link>{" "}
-                and tap the heart to save them here.
-              </span>
-            }
-          />
-        )
+        <EmptyState
+          title="No saved recipes yet"
+          description={
+            <span>
+              Browse{" "}
+              <Link href="/recipes" className={browseRecipesLinkClass}>
+                all recipes
+              </Link>{" "}
+              and tap the heart to save them here.
+            </span>
+          }
+        />
       ) : (
         <RecipeGrid>
           {recipes.map((recipe) => (

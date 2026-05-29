@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
+import { FavoritesCatalogSync } from "@/components/layout/favorites-catalog-sync";
 import { SiteHeader } from "@/components/layout/site-header";
 import "./globals.css";
 
@@ -25,6 +26,7 @@ export default function RootLayout({
       className={`${inter.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col font-sans">
+        <FavoritesCatalogSync />
         <SiteHeader />
         <div className="flex-1">{children}</div>
       </body>
